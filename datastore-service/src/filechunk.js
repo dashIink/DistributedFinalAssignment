@@ -1,7 +1,7 @@
 const db = require("./db");
 
 const createFileChunk = (fileID, chunk, sequence) => {
-  const query = `INSERT INTO file_chunks (file_id, chunk, sequence) VALUES (?, ?, ?, ?)`;
+  const query = `INSERT INTO file_chunks (file_id, chunk, file_sequence) VALUES (?, ?, ?)`;
   db.run(query, [fileID, chunk, sequence], (e) => {
     if (e) {
       console.error(e);
