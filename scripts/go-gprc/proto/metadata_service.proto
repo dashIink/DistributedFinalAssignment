@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package metadata_serice;
+
+option go_package = ".pb;gen";
+
+service MetadataService {
+    rpc GetTopKDatastore ( GetTopKDatastoreRequest ) returns ( GetTopKDatastoreResponse ) {}
+    rpc GetFileChunkLocations ( GetFileChunkLocationsRequest ) returns ( GetFileChunkLocationResponse ) {}
+}
+
+message GetTopKDatastoreRequest {
+    uint64 top_k = 1;
+};
+
+message GetTopKDatastoreResponse {
+    repeated string datastores = 1;
+};
+
+message GetFileChunkLocationsRequest {
+    string file_id = 1;
+};
+
+message GetFileChunkLocationResponse {
+    repeated string datastores = 1;
+};
