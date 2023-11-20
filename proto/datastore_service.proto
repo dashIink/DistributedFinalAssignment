@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package datastore_service;
+
+option go_package = ".pb;gen";
+
+// DatastoreService is responsible for storing and retrieving raw binary data.
+service DatastoreService {
+    
+    // Store uploads data chunks to the storage system.
+    rpc Store (stream StoreRequest) returns (StoreResponse);
+    
+    // Retrieve downloads data chunks from the storage system based on a chunk identifier.
+    rpc Retrieve (RetrieveRequest) returns (stream RetrieveResponse);
+    
+}
+
+// StoreRequest represents a request to store a data chunk with associated metadata.
+message StoreRequest {
+    string file_name = 1;
+    int64 file_size = 2;
+    string file_type = 3;
+    bytes chunk = 4;
+    string hash = 5;
+    int64 chunk_size = 6; // The length of the chunk in bytes
+};
+
+// StoreResponse is the response to a StoreRequest indicating the status of the operation.
+message StoreResponse {
+    int32 code = 1;        // The status code (e.g., 0 for success)
+    string message = 2;    // A message associated with the status code
+    string chunk_id = 3;   // The unique identifier for the stored chunk
+    string hash = 4;       // The hash of the stored data for verification
+};
+
+// RetrieveRequest is a request for retrieving a data chunk based on its unique identifier.
+message RetrieveRequest {
+    string chunk_id = 1;   // The unique identifier for the data chunk
+};
+
+// RetrieveResponse is the streamed response containing the requested data chunk.
+message RetrieveResponse {
+    bytes chunk = 1;
+    string hash = 2;
+    int64 chunk_size = 3; // The length of the chunk in bytes
+};
