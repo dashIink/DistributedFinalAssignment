@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package metadata;
 
-option go_package = ".pb;metadata";
+option go_package = ".pb;gen";
 
 // Represents information about a file as a whole.
 message FileMetadata {

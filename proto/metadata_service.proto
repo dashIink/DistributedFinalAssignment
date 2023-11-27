@@ -48,8 +48,9 @@ message GetTopKDatastoresResponse {
 message DatastoreInfo {
     string datastore_id = 1; // A unique identifier for the datastore, such as a UUID.
     string hostname = 2;     // The network hostname or IP address of the datastore.
-    int64 capacity = 3;      // Total capacity of the datastore.
-    int64 used = 4;          // Space used within the datastore.
+    int32 port = 3;          // The network port of the datastore.
+    int64 capacity = 4;      // Total capacity of the datastore.
+    int64 used = 5;          // Space used within the datastore.
     // Additional fields can be added here.
 }
 
@@ -63,8 +64,8 @@ message GetFileChunkLocationsRequest {
 // Response with locations of a file chunk.
 message GetFileChunkLocationResponse {
     string chunk_id = 1;
-    uint64 sequence = 2;
-    repeated DatastoreInfo datastores = 3;
+    uint64 chunk_sequence = 2;
+    DatastoreInfo datastores = 3;
     int64 chunk_size = 4;
     string chunk_hash = 5;
     Status status = 6; // Include status in each streamed response.
@@ -78,6 +79,7 @@ message RegisterFileChunkRequest {
     int64 chunk_size = 4;
     string chunk_hash = 5;
     int64 timestamp = 6;
+    string file_chunk_id = 7;
 };
 
 // Response for registering a file chunk.

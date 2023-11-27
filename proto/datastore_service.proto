@@ -17,12 +17,14 @@ service DatastoreService {
 
 // StoreRequest represents a request to store a data chunk with associated metadata.
 message StoreRequest {
-    string file_name = 1;
-    int64 file_size = 2;
-    string file_type = 3;
-    bytes chunk = 4;
-    string hash = 5;
-    int64 chunk_size = 6; // The length of the chunk in bytes
+    string file_id = 1;    // The unique identifier for the file
+    string file_name = 2;
+    int64 file_size = 3;
+    string file_type = 4;
+    bytes chunk = 5;
+    string hash = 6;
+    int64 chunk_size = 7; // The length of the chunk in bytes
+    uint64 chunk_sequence = 8; // The sequence number of the chunk
 };
 
 // StoreResponse is the response to a StoreRequest indicating the status of the operation.
@@ -31,6 +33,7 @@ message StoreResponse {
     string message = 2;    // A message associated with the status code
     string chunk_id = 3;   // The unique identifier for the stored chunk
     string hash = 4;       // The hash of the stored data for verification
+    uint64 chunk_sequence = 5; // The sequence number of the chunk
 };
 
 // RetrieveRequest is a request for retrieving a data chunk based on its unique identifier.
@@ -43,4 +46,5 @@ message RetrieveResponse {
     bytes chunk = 1;
     string hash = 2;
     int64 chunk_size = 3; // The length of the chunk in bytes
+    uint64 chunk_sequence = 4; // The sequence number of the chunk
 };
