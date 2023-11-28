@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  file_handler_service:
+    image: file-handler-service:latest
+    build:
+      context: ./file-handler-server
+      dockerfile: Dockerfile
+    ports:
+      - "50352:50352"
+    environment:
+      - SERVER_PORT=50352
+      - METADATA_SERVICE_HOST=metadata_service
+      - METADATA_SERVICE_PORT=50051
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - metadata_service
+
+  metadata_service:
+    image: metadata-service:latest
+    build:
+      context: ./metadata-service
+      dockerfile: Dockerfile
+    environment:
+      - STORAGE_HOSTNAME=redis
+      - STORAGE_PORT=6379
+      - STORAGE_PASSWORD=mysecretpassword
+      - STORAGE_DB=0
+      - ZEROMQ_PROXY_PORT=5555
+      - PORT=50051
+      # - ZEROMQ_PROXY_HOST=zeromq_proxy
+    ports:
+      - "50051:50051"
+    depends_on:
+      - redis
+  
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=mysecretpassword
+
+  datastore_1:
+    image: datastore-service:latest
+    build:
+      context: ./datastore-service
+      dockerfile: Dockerfile
+    environment:
+      - METADATA_SERVICE_HOSTNAME=metadata_service
+      - METADATA_SERVICE_PORT=50051
+      - HOSTNAME=datastore_1
+      - PORT=6668
+      - ZEROMQ_PROXY_HOSTNAME=metadata_service
+      - ZEROMQ_PROXY_PORT=5555
+    ports:
+      - "6668:6668"
+    volumes:
+      - datastore_1:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.03'
+          memory: 450M
+        reservations:
+          cpus: '0.002'
+          memory: 250M
+  
+  datastore_2:
+    image: datastore-service:latest
+    build:
+      context: ./datastore-service
+      dockerfile: Dockerfile
+    environment:
+      - METADATA_SERVICE_HOSTNAME=metadata_service
+      - METADATA_SERVICE_PORT=50051
+      - HOSTNAME=datastore_2
+      - PORT=6667
+      - ZEROMQ_PROXY_HOSTNAME=metadata_service
+      - ZEROMQ_PROXY_PORT=5555
+    ports:
+      - "6667:6667"
+    volumes:
+      - datastore_2:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.01'
+          memory: 195M
+        reservations:
+          cpus: '0.002'
+          memory: 110M
+  
+  datastore_3:
+    image: datastore-service:latest
+    build:
+      context: ./datastore-service
+      dockerfile: Dockerfile
+    environment:
+      - METADATA_SERVICE_HOSTNAME=metadata_service
+      - METADATA_SERVICE_PORT=50051
+      - HOSTNAME=datastore_3
+      - PORT=6669
+      - ZEROMQ_PROXY_HOSTNAME=metadata_service
+      - ZEROMQ_PROXY_PORT=5555
+    ports:
+      - "6669:6669"
+    volumes:
+      - datastore_3:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.05'
+          memory: 670M
+        reservations:
+          cpus: '0.003'
+          memory: 275M
+
+
+# networks:
+#   proxy_network:
+#     driver: bridge
+#   default:
+#     driver: bridge
+#   redis_net:
+#     driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  datastore_1:
+  datastore_2:
+  datastore_3:
