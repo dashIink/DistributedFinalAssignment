@@ -8,3 +8,6 @@ __pycache__
 **/__pycache__
 **/**/*/__pycache__
 **/**/__pycache__
+gen/*pb2.py
+gen/*pb2_grpc.py
+gen/*pb2.pyi
