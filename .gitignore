@@ -1,0 +1,12 @@
+/**/*/node_modules
+
+zeromq-proxy/
+
+**/__pycache__
+**/node_modules
+
+scripts/**/proto/*.proto
+scripts/**/generated/*.py
+scripts/**/generated/*.pyi
+scripts/**/generated/*.ts
+scripts/**/generated/.pb/
