@@ -21,7 +21,7 @@ func (d *Datastore) String() string {
 	return fmt.Sprintf("%s:%d", d.Hostname, d.Port)
 }
 
-const DEFAULT_TTL = time.Duration(10000) * time.Millisecond
+const DEFAULT_TTL = time.Duration(17000) * time.Millisecond
 const DEFAULT_MAX_MISSED = 3
 
 type TTLDatastore struct {
@@ -34,10 +34,10 @@ type TTLDatastore struct {
 }
 
 const (
-	weightFreeSpace    = 3
-	weightFreeRam      = 2
-	weightDatabaseSize = 1
-	weightMissedCount  = 5
+	weightFreeSpace    = 5
+	weightFreeRam      = 5
+	weightDatabaseSize = 50
+	weightMissedCount  = 10
 )
 
 func (d *TTLDatastore) Score() uint64 {

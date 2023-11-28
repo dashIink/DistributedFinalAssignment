@@ -34,7 +34,7 @@ type MetadataServiceServer struct {
 func (s *MetadataServiceServer) GetTopKDatastores(ctx context.Context, req *gen.GetTopKDatastoresRequest) (*gen.GetTopKDatastoresResponse, error) {
 	topKDatastores := s.datastores.TopK(req.K)
 	log.Println("Received request for top", req.K, "datastores")
-	datastores := make([]*gen.DatastoreInfo, req.K)
+	datastores := make([]*gen.DatastoreInfo, 0)
 	for i, datastore := range topKDatastores {
 		log.Println("Datastore", i, ":", datastore.Datastore.String())
 		log.Println("Datastore", i, ":", datastore.SystemStatus.String())
@@ -48,12 +48,12 @@ func (s *MetadataServiceServer) GetTopKDatastores(ctx context.Context, req *gen.
 			log.Println("Error parsing databaseSize:", err)
 			return nil, err
 		}
-		datastores[i] = &gen.DatastoreInfo{
+		datastores = append(datastores, &gen.DatastoreInfo{
 			DatastoreId: datastore.String(),
 			Hostname:    datastore.Hostname,
 			Capacity:    int64(freeSpace),    // TODO: change the capacity type to uint64
 			Used:        int64(databaseSize), // TODO: change the used type to uint64
-		}
+		})
 	}
 	status := status.New(codes.OK, "Success")
 	return &gen.GetTopKDatastoresResponse{
@@ -129,6 +129,7 @@ type FileChunkMetadata struct {
 
 func (s *MetadataServiceServer) RegisterFileChunk(ctx context.Context, req *gen.RegisterFileChunkRequest) (*gen.RegisterFileChunkResponse, error) {
 	key := fmt.Sprintf("file:metadata:%s", req.FileId)
+	log.Println("Received request to register file chunk:", req.FileChunkId)
 	_, err := s.rds.ZAdd(ctx, key, redis.Z{
 		Score:  float64(req.Sequence),
 		Member: fmt.Sprintf("chunk:metadata:%s", req.FileChunkId),
@@ -146,6 +147,7 @@ func (s *MetadataServiceServer) RegisterFileChunk(ctx context.Context, req *gen.
 		ChunkSequenceNumber: req.Sequence,
 	}
 	key2 := fmt.Sprintf("chunk:metadata:%s", req.FileChunkId)
+	fmt.Printf("Chunk metadata key: %s\n", key2)
 	_, err = s.rds.HSet(ctx, fmt.Sprintf(key2, req.FileChunkId), fileChunkMetadata).Result()
 	if err != nil {
 		return nil, err
@@ -275,7 +277,7 @@ func main() {
 	}()
 
 	//
-	go PeriodicCheck(datastores, time.Duration(5)*time.Second)
+	go PeriodicCheck(datastores, time.Duration(13)*time.Second)
 
 	// get the port from the environment variable
 	port := os.Getenv("PORT")
