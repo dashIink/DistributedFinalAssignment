@@ -84,12 +84,22 @@ def upload_file():
                     )
                 if send_segment_error:
                     return jsonify({"error": "Error sending segment to datastore"}), 500
+                if os.path.exists(os.path.join(Config.DOWNLOAD_FOLDER, segment_name)):
+                    os.remove(os.path.join(Config.DOWNLOAD_FOLDER, segment_name))
                     
 
             uploaded_files.append({
                 "id": unique_id,
                 "name": file.filename
             })
+
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            else:
+                print(f"The file does not exist {file_path}", flush=True, file=sys.stderr)
+                current_app.logger.error(f"The file does not exist {file_path}")
+            
+
     return jsonify({"files": uploaded_files}), 200
 
 @server_routes.route('/download/<file_id>', methods=['GET'])

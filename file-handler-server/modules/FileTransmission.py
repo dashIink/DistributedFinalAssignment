@@ -24,7 +24,7 @@ def store_request_iterator(
     chunk_sequence: int,
 ) -> Iterator[StoreRequest]:
     while True:
-        chunk = file.read(4096)
+        chunk = file.read(4096 * 1024)
         if not chunk:
             break
         yield StoreRequest(
