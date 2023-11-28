@@ -1,5 +1,7 @@
 import { ServerWritableStream, sendUnaryData, status } from '@grpc/grpc-js';
 
+import * as crypto from 'crypto';
+
 import { ServerReadableStream, } from '@grpc/grpc-js';
 
 import { DatastoreServiceServer, RetrieveRequest, RetrieveResponse, StoreRequest, StoreResponse } from './gen/datastore_service';
@@ -66,9 +68,19 @@ function getDatastoreServer(): DatastoreServiceServer {
                     chunkSequence: lastChunk.chunkSequence
                 }
             }).then((response) => {
+                if (!lastChunk) {
+                    callback({ code: status.INTERNAL, message: 'Last chunk not found' });
+                    return;
+                }
+
+                const hash_buffer = crypto.createHash('sha256').update(buffer).digest('hex');
+                if (hash_buffer !== lastChunk.hash) {
+                    callback({ code: status.INTERNAL, message: 'Hashes do not match' });
+                    return;
+                }
                 const cliResp: StoreResponse = {
                     chunkId: response.chunkId,
-                    hash: '', // TODO: response.hash is not defined
+                    hash: hash_buffer,
                     code: status.OK,
                     message: 'Chunk stored',
                     chunkSequence: response.chunkSequence

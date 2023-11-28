@@ -38,7 +38,7 @@ async function startPublisher(interval: number): Promise<NodeJS.Timeout> {
             ramUsage;
 
             console.log(`Sending heartbeat from ${HOSTNAME}:${PORT}`);
-            console.log(systemStatus)
+            // console.log(systemStatus)
 
             // Send the message
             await sock.send(['datastore_heartbeats',

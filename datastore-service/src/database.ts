@@ -22,6 +22,7 @@ export type CHUNKS_TABLE_COLUMNS = {
     chunkSize: number;
     hash: string;
     fileType: string;
+    fileSize: number;
     chunk: Buffer;
     chunkSequence: number;
     createdAt: string;
@@ -37,6 +38,7 @@ function createTables() {
             chunkSize INTEGER NOT NULL,
             hash TEXT NOT NULL,
             fileType TEXT NOT NULL,
+            fileSize INTEGER NOT NULL,
             chunk BLOB NOT NULL,
             chunkSequence INTEGER NOT NULL,
             createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

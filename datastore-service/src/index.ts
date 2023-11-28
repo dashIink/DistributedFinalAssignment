@@ -9,7 +9,7 @@ import startPublisher from "./messaging";
 import { PORT as port } from "./config";
 import metadataClient from "./metadata_service_client";
 
-const PUBLISH_INTERVAL = Number(process.env.PUBLISH_INTERVAL) || 2;
+const PUBLISH_INTERVAL = Number(process.env.PUBLISH_INTERVAL) || 10;
 
 
 const server = new Server();
