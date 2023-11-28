@@ -48,9 +48,9 @@ def send_segment_to_ip(
     destination_ip: str
 ) -> Optional[DatastoreServiceError]:
     current_app.logger.debug(f"file_id={file_id}")
-    file_path = os.path.join(Config.DOWNLOAD_FOLDER, segment_name)
-    segment_hash = hash_file(file_path)
-    with open(file_path, 'rb') as f:
+    segment_path = os.path.join(Config.DOWNLOAD_FOLDER, segment_name)
+    segment_hash = hash_file(segment_path)
+    with open(segment_path, 'rb') as f:
         with grpc.insecure_channel(destination_ip) as channel:
             try:
                 grpc.channel_ready_future(channel).result(timeout=10)
@@ -75,7 +75,11 @@ def send_segment_to_ip(
                 current_app.logger.debug(f"chunk_sequence={response.chunk_sequence}")
                 current_app.logger.debug(f"message={response.message}")
 
-                return None
+    # TODO: remove segment file after sending it to datastore
+    # if os.path.exists(segment_path):
+    #     os.remove(segment_path)
+    return None
+
 
                     
 
