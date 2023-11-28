@@ -15,4 +15,4 @@ app.config['UPLOAD_FOLDER'] = Config.UPLOAD_FOLDER
 app.config['DOWNLOAD_FOLDER'] = Config.DOWNLOAD_FOLDER
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=Config.server_port, debug=True)

@@ -11,11 +11,7 @@ from gen.datastore_service_pb2 import StoreRequest, StoreResponse
 
 from modules.Utils import hash_file
 
-import logging
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
+from flask import current_app
 
 #  iterator 
 def store_request_iterator(
@@ -28,7 +24,7 @@ def store_request_iterator(
     chunk_sequence: int,
 ) -> Iterator[StoreRequest]:
     while True:
-        chunk = file.read(1024)
+        chunk = file.read(4096)
         if not chunk:
             break
         yield StoreRequest(
@@ -51,15 +47,18 @@ def send_segment_to_ip(
     segment_name: str, 
     destination_ip: str
 ) -> Optional[DatastoreServiceError]:
-    with open(os.path.join(Config.DOWNLOAD_FOLDER, segment_name), 'rb') as f:
+    current_app.logger.debug(f"file_id={file_id}")
+    file_path = os.path.join(Config.DOWNLOAD_FOLDER, segment_name)
+    segment_hash = hash_file(file_path)
+    with open(file_path, 'rb') as f:
         with grpc.insecure_channel(destination_ip) as channel:
             try:
                 grpc.channel_ready_future(channel).result(timeout=10)
             except grpc.FutureTimeoutError:
+                current_app.logger.error("Connection timeout")
                 return DatastoreServiceError("Connection timeout")
             else:
                 stub = DatastoreServiceStub(channel)
-                segment_hash = hash_file(f)
                 request_iterator = store_request_iterator(
                     file=f,
                     file_id=file_id,
@@ -70,11 +69,13 @@ def send_segment_to_ip(
                     chunk_hash=segment_hash
                 )
                 response: StoreResponse = stub.Store(request_iterator)
-                logger.debug(f"code={response.code}")
-                logger.debug(f"chunk_id={response.chunk_id}")
-                logger.debug(f"hash={response.hash}")
-                logger.debug(f"chunk_sequence={response.chunk_sequence}")
-                logger.debug(f"message={response.message}")
+                current_app.logger.debug(f"code={response.code}")
+                current_app.logger.debug(f"chunk_id={response.chunk_id}")
+                current_app.logger.debug(f"hash={response.hash}")
+                current_app.logger.debug(f"chunk_sequence={response.chunk_sequence}")
+                current_app.logger.debug(f"message={response.message}")
+
+                return None
 
                     
 

@@ -1,18 +1,21 @@
 import os
 import shutil
 
+from flask import current_app
+
 def reassemble_file(file_id, input_directory, output_file, num_segments):
     with open(output_file, 'wb') as outfile:
         for i in range(num_segments):
             segment_name = f"{file_id}_segment_{i + 1}.dat"
             segment_path = os.path.join(input_directory, segment_name)
-            print(f"segment_path={segment_path}")
+            current_app.logger.error(f"segment_path={segment_path}")
             with open(segment_path, 'rb') as infile:
                 shutil.copyfileobj(infile, outfile)
 
 def split_file(input_file, output_directory, num_segments):
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
+    segment_filenames = []
     with open(input_file, 'rb') as infile:
         file_size = os.path.getsize(input_file)
         segment_size = file_size // num_segments
@@ -25,3 +28,6 @@ def split_file(input_file, output_directory, num_segments):
                 current_segment_size = min(segment_size, remaining_size)
                 data = infile.read(current_segment_size)
                 outfile.write(data)
+                segment_filenames.append(segment_name)
+
+    return segment_filenames
