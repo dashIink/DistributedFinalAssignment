@@ -1,0 +1,10 @@
+.tool-versions
+.venv
+__pycache__
+.idea
+.vscode
+_tests
+_sims
+**/*/__pycache__
+**/*.pyc
+**/__pycache__
