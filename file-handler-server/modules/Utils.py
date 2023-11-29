@@ -43,7 +43,7 @@ def hash_file(file_path, hash_type="sha256"):
 
 import itertools
 
-def distribute_chunks_with_sequence(chunks, grpc_strings) -> Dict[str, List[Tuple[int, str]]]:
+def distribute_chunks_with_sequence(chunks: List[Tuple[str, int]], grpc_strings) -> Dict[str, List[Tuple[str, int]]]:
     """
     Distributes chunks to the strings returned by a gRPC call as evenly as possible
     and includes the sequence number for each chunk.
@@ -60,10 +60,10 @@ def distribute_chunks_with_sequence(chunks, grpc_strings) -> Dict[str, List[Tupl
     extra_chunks = len(chunks) % len(grpc_strings)
 
     # Create an iterator for the chunks with sequence numbers
-    chunks_iter = iter(enumerate(chunks))
+    chunks_iter = iter(chunks)
 
     # Distribute chunks as evenly as possible
-    distribution = {}
+    distribution: Dict[str, List[Tuple[str, int]]] = {}
     for grpc_string in grpc_strings:
         # Assign each gRPC string its calculated number of chunks
         distribution[grpc_string] = [next(chunks_iter) for _ in range(chunks_per_string)]
@@ -76,29 +76,26 @@ def distribute_chunks_with_sequence(chunks, grpc_strings) -> Dict[str, List[Tupl
     return distribution
 
 
-from itertools import cycle, islice
+from typing import Dict, List, Tuple, Iterator
 
-def even_chunk_iterator(distribution) -> Iterator[Tuple[str, Tuple[int, str]]]:
+def even_chunk_iterator(data: Dict[str, List[Tuple[str, int]]]) -> Iterator[Tuple[str, Tuple[str, int]]]:
     """
-    Creates an iterator that cycles through the gRPC strings evenly, yielding
-    (grpc_string, (sequence_num, chunk)) pairs one by one.
-    
-    :param distribution: Dictionary with gRPC strings as keys and lists of tuples (sequence, chunk) as values.
-    :return: Iterator of tuples (grpc_string, (sequence_num, chunk)).
+    Iterates over a dictionary of type Dict[str, List[Tuple[str, int]]] in an even manner across all keys.
+
+    :param data: Dictionary with keys as strings and values as lists of tuples (string, int).
+    :return: An iterator that yields a tuple consisting of the key and one of its associated value tuples in an even manner.
     """
-    # Create an iterator that cycles through the gRPC strings
-    grpc_cycle = cycle(distribution.items())
+    # Create an iterator for each list in the dictionary
+    iterators = {key: iter(value) for key, value in data.items()}
 
-    # Calculate the total number of chunks
-    total_chunks = sum(len(chunks) for chunks in distribution.values())
-
-    # Create an iterator that cycles through each gRPC string and yields the next chunk
-    even_iterator = (
-        (grpc_string, chunk) 
-        for grpc_string, chunks in grpc_cycle 
-        for chunk in islice(chunks, 1)  # Take one chunk from the current gRPC string
-    )
-
-    # Use islice to limit the iterator to the total number of chunks
-    return islice(even_iterator, total_chunks)
+    # Continue until all iterators are exhausted
+    while iterators:
+        # Iterate over a copy of the keys to allow modification of the original during iteration
+        for key in list(iterators.keys()):
+            try:
+                # Yield the next item from the current iterator
+                yield key, next(iterators[key])
+            except StopIteration:
+                # Remove the iterator if it's exhausted
+                del iterators[key]
 
