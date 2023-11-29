@@ -47,4 +47,6 @@ message RetrieveResponse {
     string hash = 2;
     int64 chunk_size = 3; // The length of the chunk in bytes
     uint64 chunk_sequence = 4; // The sequence number of the chunk
+    string file_name = 5;
+    string file_type = 6;
 };
