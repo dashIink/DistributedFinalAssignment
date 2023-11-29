@@ -4,6 +4,10 @@ mkdir -p go-grpc/proto
 mkdir -p nodejs-grpc/proto
 mkdir -p python-grpc/proto
 
+rm go-grpc/proto/*.proto
+rm nodejs-grpc/proto/*.proto
+rm python-grpc/proto/*.proto
+
 cp -r ../proto/*.proto go-grpc/proto
 cp -r ../proto/*.proto nodejs-grpc/proto
 cp -r ../proto/*.proto python-grpc/proto
