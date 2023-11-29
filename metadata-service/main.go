@@ -68,6 +68,7 @@ func (s *MetadataServiceServer) GetTopKDatastores(ctx context.Context, req *gen.
 
 func (s *MetadataServiceServer) GetFileChunkLocations(req *gen.GetFileChunkLocationsRequest, stream gen.MetadataService_GetFileChunkLocationsServer) error {
 	fileId := req.FileId
+	log.Println("Received request to get file chunk locations for file:", req.FileId)
 	key := fmt.Sprintf("file:metadata:%s", fileId)
 	chunkMetadataKeys, err := s.rds.ZRange(context.Background(), key, 0, -1).Result()
 	if err != nil {
@@ -77,23 +78,30 @@ func (s *MetadataServiceServer) GetFileChunkLocations(req *gen.GetFileChunkLocat
 	for _, chunkMetadataKey := range chunkMetadataKeys {
 		fileChunkMetadata, err := s.rds.HGetAll(context.Background(), chunkMetadataKey).Result()
 		if err != nil {
+			log.Println("Error getting chunk metadata:", err)
 			return err
 		}
 		datastoreId := fileChunkMetadata["datastore_id"]
+		log.Println("Datastore ID:", datastoreId)
 		chunkId := fileChunkMetadata["chunk_id"]
+		log.Println("Chunk ID:", chunkId)
 		chunkSize, err := strconv.Atoi(fileChunkMetadata["chunk_size"])
 		if err != nil {
+			log.Println("Error converting chunk size to int:", err)
 			return err
 		}
+		log.Println("Chunk size:", chunkSize)
 		chunkHash := fileChunkMetadata["chunk_hash"]
 		chunkSequenceNumber, err := strconv.ParseUint(fileChunkMetadata["chunk_sequence_number"], 10, 64)
 		if err != nil {
+			log.Println("Error converting chunk sequence number to uint64:", err)
 			return err
 		}
 
 		hostname := strings.Split(datastoreId, ":")[0]
 		port, err := strconv.Atoi(strings.Split(datastoreId, ":")[1])
 		if err != nil {
+			log.Println("Error converting port to int:", err)
 			return err
 		}
 		status := status.New(codes.OK, "Success")
@@ -129,12 +137,15 @@ type FileChunkMetadata struct {
 
 func (s *MetadataServiceServer) RegisterFileChunk(ctx context.Context, req *gen.RegisterFileChunkRequest) (*gen.RegisterFileChunkResponse, error) {
 	key := fmt.Sprintf("file:metadata:%s", req.FileId)
-	log.Println("Received request to register file chunk:", req.FileChunkId)
+	log.Println("Received request to register file chunk for file:", req.FileId)
+
+	log.Println("Chunk ID:", req.FileChunkId)
 	_, err := s.rds.ZAdd(ctx, key, redis.Z{
 		Score:  float64(req.Sequence),
 		Member: fmt.Sprintf("chunk:metadata:%s", req.FileChunkId),
 	}).Result()
 	if err != nil {
+		log.Println("Error adding chunk metadata to sorted set:", err)
 		return nil, err
 	}
 
@@ -148,8 +159,9 @@ func (s *MetadataServiceServer) RegisterFileChunk(ctx context.Context, req *gen.
 	}
 	key2 := fmt.Sprintf("chunk:metadata:%s", req.FileChunkId)
 	fmt.Printf("Chunk metadata key: %s\n", key2)
-	_, err = s.rds.HSet(ctx, fmt.Sprintf(key2, req.FileChunkId), fileChunkMetadata).Result()
+	_, err = s.rds.HSet(ctx, key2, fileChunkMetadata).Result()
 	if err != nil {
+		log.Println("Error setting chunk metadata:", err)
 		return nil, err
 	}
 
