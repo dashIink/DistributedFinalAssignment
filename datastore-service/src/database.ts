@@ -17,6 +17,7 @@ const db: sqlite3.Database = new sqlite3.Database(dbFilePath, (err: Error | null
 
 
 export type CHUNKS_TABLE_COLUMNS = {
+    fileId: string;
     filename: string;
     chunkId: string;
     chunkSize: number;
@@ -33,8 +34,9 @@ function createTables() {
     // chunks table filename, chunkId ( uuid, unique ), chunkSize, hash, fileType, chunk (actual data), chunkSequence, createdAt
     for (const table of ["chunks"]) {
         db.run(`CREATE TABLE IF NOT EXISTS ${table} (
+            fileId TEXT NOT NULL,
             filename TEXT NOT NULL,
-            chunkId TEXT NOT NULL UNIQUE,
+            chunkId TEXT NOT NULL UNIQUE PRIMARY KEY,
             chunkSize INTEGER NOT NULL,
             hash TEXT NOT NULL,
             fileType TEXT NOT NULL,

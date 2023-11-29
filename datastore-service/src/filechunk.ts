@@ -27,12 +27,13 @@ export type CreateChunkResponse = {
 };
 
 export async function storeChunk(req: CreateChunkRequest): Promise<CreateChunkResponse> {
+
     const uid = uuidv4();
     const { data, metadata } = req;
-    const { filename, fileSize, fileType, hash, chunkSize, chunkSequence } = metadata;
+    const { fileId, filename, fileSize, fileType, hash, chunkSize, chunkSequence } = metadata;
 
-    const query = `INSERT INTO chunks (filename, fileSize, fileType, hash, chunkSize, chunkSequence, chunkId, chunk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-    const params = [filename, fileSize, fileType, hash, chunkSize, chunkSequence, uid, data];
+    const query = `INSERT INTO chunks (fileId, filename, fileSize, fileType, hash, chunkSize, chunkSequence, chunkId, chunk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const params = [fileId, filename, fileSize, fileType, hash, chunkSize, chunkSequence, uid, data];
 
     return new Promise((resolve, reject) => {
         db.run(query, params, function (err) {
@@ -40,6 +41,8 @@ export async function storeChunk(req: CreateChunkRequest): Promise<CreateChunkRe
                 console.error('Error storing chunk', err);
                 reject(err);
             } else {
+                console.log(`Stored chunk ${uid} for file ${fileId} with sequence ${chunkSequence}`);
+
                 resolve({
                     chunkId: uid,
                     status: ChunkStatus.STORED,
@@ -59,12 +62,14 @@ export type RetrieveChunkResponse = {
     chunkSize: number;
     hash: string;
     chunkSequence: number;
+    fileName: string;
+    fileType: string;
 };
 
 export async function retrieveChunk(req: RetrieveChunkRequest): Promise<RetrieveChunkResponse> {
     const { chunkId } = req;
 
-    const query = `SELECT chunk, chunkSize, hash, chunkSequence FROM chunks WHERE chunkId = ?`;
+    const query = `SELECT chunk, chunkSize, hash, chunkSequence, filename, fileType FROM chunks WHERE chunkId = ?`;
     const params = [chunkId];
     
     return new Promise((resolve, reject) => {
@@ -74,12 +79,14 @@ export async function retrieveChunk(req: RetrieveChunkRequest): Promise<Retrieve
                 reject(err);
             } else {
                 if (row) {
-                    const { chunk, chunkSize, hash, chunkSequence } = row;
+                    const { chunk, chunkSize, hash, chunkSequence, filename, fileType } = row;
                     resolve({
                         chunk,
                         chunkSize,
                         hash,
-                        chunkSequence
+                        chunkSequence,
+                        fileName: filename,
+                        fileType: fileType
                     });
                 } else {
                     reject(new Error('Chunk not found'));

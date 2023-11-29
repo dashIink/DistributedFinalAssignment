@@ -85,8 +85,11 @@ function getDatastoreServer(): DatastoreServiceServer {
                     message: 'Chunk stored',
                     chunkSequence: response.chunkSequence
                 };
+
+                console.log(`Storing chunk ${response.chunkId} for file ${lastChunk.fileId}`)
+
                 metadataClient.registerFileChunk({
-                    fileId: lastChunk!.fileId,
+                    fileId: lastChunk.fileId,
                     sequence: response.chunkSequence,
                     fileChunkId: response.chunkId,
                     datastoreId: `${HOSTNAME}:${PORT}`,
@@ -132,7 +135,9 @@ function getDatastoreServer(): DatastoreServiceServer {
                     chunk: smallerChunk,
                     chunkSize,
                     hash,
-                    chunkSequence
+                    chunkSequence,
+                    fileName: retrieveChunkResponse.fileName,
+                    fileType: retrieveChunkResponse.fileType
                 };
                 call.write(chunkResponse);
                 offset = end;
