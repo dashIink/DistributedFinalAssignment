@@ -7,9 +7,9 @@ services:
       context: ./file-handler-server
       dockerfile: Dockerfile
     ports:
-      - "50352:50352"
+      - "55353:55353"
     environment:
-      - SERVER_PORT=50352
+      - SERVER_PORT=55353
       - METADATA_SERVICE_HOST=metadata_service
       - METADATA_SERVICE_PORT=50051
       - PYTHONUNBUFFERED=1
