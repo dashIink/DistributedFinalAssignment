@@ -1,0 +1,2 @@
+python metadata_test_client_upload.py
+pause

@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package metadata_service;
+
+option go_package = ".pb;gen";
+
+// Custom enum for operation status.
+enum OperationStatus {
+    SUCCESS = 0;            // Operation was successful.
+    ERROR = 1;              // Operation encountered an error.
+    NOT_FOUND = 2;          // The requested item was not found.
+    ALREADY_EXISTS = 3;     // The item already exists.
+    INVALID_ARGUMENT = 4;   // The request contained an invalid argument.
+    // Add additional status codes as needed.
+}
+
+// Custom Status is used to provide detailed error statuses in response messages.
+message Status {
+    // The numeric error code, which should follow an established error code convention.
+    int32 code = 1;
+
+    // A developer-facing error message, which should be descriptive and human-readable.
+    string message = 2;
+
+    // A list of strings providing additional error details. This field is optional.
+    repeated string details = 3;
+}
+
+// MetadataService provides metadata management for the distributed storage system.
+service MetadataService {
+    rpc GetTopKDatastores (GetTopKDatastoresRequest) returns (GetTopKDatastoresResponse);
+    rpc GetFileChunkLocations (GetFileChunkLocationsRequest) returns (stream GetFileChunkLocationResponse);
+    rpc RegisterFileChunk (RegisterFileChunkRequest) returns (RegisterFileChunkResponse);
+}
+
+// Request to retrieve the top K datastores.
+message GetTopKDatastoresRequest {
+    uint64 k = 1;
+};
+
+// Response with a list of datastore information.
+message GetTopKDatastoresResponse {
+    repeated DatastoreInfo datastores = 1;
+    Status status = 2; // Use standard Status message for error handling.
+};
+
+// Detailed information about a datastore.
+message DatastoreInfo {
+    string datastore_id = 1; // A unique identifier for the datastore, such as a UUID.
+    string hostname = 2;     // The network hostname or IP address of the datastore.
+    int32 port = 3;          // The network port of the datastore.
+    int64 capacity = 4;      // Total capacity of the datastore.
+    int64 used = 5;          // Space used within the datastore.
+    // Additional fields can be added here.
+}
+
+// Request to get locations of chunks for a file.
+message GetFileChunkLocationsRequest {
+    string file_id = 1;
+    // uint64 page_size = 2; // For pagination.
+    // uint64 page_token = 3; // For pagination.
+};
+
+// Response with locations of a file chunk.
+message GetFileChunkLocationResponse {
+    string chunk_id = 1;
+    uint64 chunk_sequence = 2;
+    DatastoreInfo datastores = 3;
+    int64 chunk_size = 4;
+    string chunk_hash = 5;
+    Status status = 6; // Include status in each streamed response.
+};
+
+// Request to register a file chunk.
+message RegisterFileChunkRequest {
+    string datastore_id = 1;
+    string file_id = 2;
+    uint64 sequence = 3;
+    int64 chunk_size = 4;
+    string chunk_hash = 5;
+    int64 timestamp = 6;
+    string file_chunk_id = 7;
+};
+
+// Response for registering a file chunk.
+message RegisterFileChunkResponse {
+    string file_chunk_id = 1;
+    Status status = 2;
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package metadata;
+
+option go_package = ".pb;gen";
+
+// Represents information about a file as a whole.
+message FileMetadata {
+    string file_id = 1;      // Unique identifier for the file.
+    int64 total_chunks = 2;  // The total number of chunks that make up the file.
+    int64 file_size = 3;     // The total size of the file in bytes.
+    string file_name = 4;    // The original file name.
+    // Additional file metadata can be included here.
+}
+
+// Represents metadata for an individual chunk of a file.
+message ChunkMetadata {
+    string file_id = 1;        // The identifier for the file to which this chunk belongs.
+    uint64 chunk_sequence = 2; // The sequence number of this chunk within the file.
+    int64 chunk_size = 3;      // The size of this chunk in bytes.
+    string chunk_hash = 4;     // A hash of the chunk's contents for integrity checking.
+    string datastore_id = 5;   // The identifier for the datastore where this chunk is stored.
+    // Additional chunk metadata can be included here.
+}
+
+// Represents a mapping from a datastore to the chunks it contains.
+message DatastoreFileIndex {
+    string datastore_id = 1;   // The identifier for the datastore.
+    repeated string file_chunk_ids = 2; // A list of identifiers for chunks stored in this datastore.
+    // Additional indexing information can be included here.
+}
+
+// Represents detailed information about a datastore.
+message DatastoreInfo {
+    string datastore_id = 1;   // A unique identifier for the datastore.
+    string hostname = 2;       // The network hostname or IP address for the datastore.
+    int64 capacity = 3;        // The total capacity of the datastore in bytes.
+    int64 used = 4;            // The amount of space used in the datastore in bytes.
+    // Additional datastore information can be included here.
+}
