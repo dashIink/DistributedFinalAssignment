@@ -34,7 +34,7 @@ Sample files used for tests can be found in the `tests` folder of this project.
 2. At the 'Send' button, click the dropdown and select 'Send and Download'
 3. Select the desired location to save the file
 
-### Additional Notes
+## Additional Notes
 
 For reference, the images that were published to Docker Hub can be found here:
 
