@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   file_handler_service:
-    image: file-handler-service:latest
+    image: ahmetk/file-handler-service:latest
     build:
       context: ./file-handler-server
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
       - metadata_service
 
   metadata_service:
-    image: metadata-service:latest
+    image: ahmetk/metadata-service:latest
     build:
       context: ./metadata-service
       dockerfile: Dockerfile
@@ -47,7 +47,7 @@ services:
       - REDIS_PASSWORD=mysecretpassword
 
   datastore_1:
-    image: datastore-service:latest
+    image: ahmetk/datastore-service:latest
     build:
       context: ./datastore-service
       dockerfile: Dockerfile
@@ -72,7 +72,7 @@ services:
           memory: 250M
   
   datastore_2:
-    image: datastore-service:latest
+    image: ahmetk/datastore-service:latest
     build:
       context: ./datastore-service
       dockerfile: Dockerfile
@@ -97,7 +97,7 @@ services:
           memory: 110M
   
   datastore_3:
-    image: datastore-service:latest
+    image: ahmetk/datastore-service:latest
     build:
       context: ./datastore-service
       dockerfile: Dockerfile
