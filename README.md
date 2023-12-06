@@ -20,7 +20,7 @@ All services of the system are containerized. Their images were built and publis
 
 Sample files used for tests can be found in the `tests` folder of this project.
 
-### Uploads
+### File Upload
 
 1. Using Postman, create a POST request with the localhost address and port number, followed by the /upload endpoint. By default this should be `http://localhost:55353/upload`.
 2. In the 'Body' tab of Postman, select the option 'form-data' from the dropdown. In the 'key' column, enter the text `files[]`. 
@@ -28,7 +28,7 @@ Sample files used for tests can be found in the `tests` folder of this project.
 4. In the value column, select the file that you want to upload.
 5. Click the 'Send' button in Postman to send the request. Verify that the response returns the file id and name.
 
-### Downloads
+### File Download
 
 1. Using Postman, create a GET request with the localhost address and port number, followed by the /download/file-id. By default this should be `http://localhost:55353/download/file-id`. Replace 'file-id' with the file id from the upload.
 2. At the 'Send' button, click the dropdown and select 'Send and Download'
